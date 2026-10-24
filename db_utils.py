@@ -5,7 +5,6 @@ import httpx
 from datetime import datetime
 from dotenv import load_dotenv
 from openai import OpenAI
-from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 
@@ -27,9 +26,11 @@ client = OpenAI(base_url=LLM_BASE_URL, api_key=LLM_API_KEY)
 # 向量化接口走普通 HTTP（多模态向量接口与 OpenAI SDK 的 embeddings 路径不同）
 _http = httpx.Client(timeout=30.0)
 
-# 本地embedding模型，正确初始化
+# 本地embedding模型：延迟导入，仅 EMBED_PROVIDER=local 时才加载，
+# 云端走方舟向量接口时无需安装 sentence-transformers / torch
 _embedding_model = None
 if EMBED_PROVIDER == "local":
+    from sentence_transformers import SentenceTransformer
     _embedding_model = SentenceTransformer(EMBED_MODEL)
 
 
@@ -238,24 +239,3 @@ def import_records(json_list):
             add_qa(q, a, source="json_import")
             cnt += 1
     return cnt
-import json
-def load_json_to_kb(json_path: str):
-    """从json文件批量导入问答到知识库，自动去重"""
-    with open(json_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    count = 0
-    for item in data:
-        q = item["question"].strip()
-        a = item["answer"].strip()
-        if not q or not a:
-            continue
-        # 简单查重：看问题是否已经存在
-        conn = sqlite3.connect(DB_PATH)
-        cur = conn.cursor()
-        cur.execute("SELECT id FROM qa WHERE question = ?", (q,))
-        row = cur.fetchone()
-        if row is None:
-            add_qa(q, a)
-            count +=1
-        conn.close()
-    return count
