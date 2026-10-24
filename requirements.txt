@@ -1,6 +1,6 @@
-streamlit>=1.35.0
-openai>=1.30.0
-chromadb==0.4.24
-numpy<2.0
-sentence-transformers>=2.7.0
-python-dotenv>=1.0.0
+streamlit
+openai>=1.40
+httpx>=0.24
+chromadb
+python-dotenv
+
