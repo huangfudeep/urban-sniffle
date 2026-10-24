@@ -1,6 +1,6 @@
-streamlit
-openai>=1.40
-httpx>=0.24
-chromadb
-python-dotenv
+streamlit>=1.35.0
+openai>=1.30.0
+chromadb==0.5.5
+python-dotenv>=1.0.0
+
 
